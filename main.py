@@ -161,3 +161,37 @@ fastest = True
 print("Recipes (A* - Fastest):", find_recipes_a_star(G, available_ingredients, time_limit, fastest=True))
 print("Recipes (A* - All within time):", find_recipes_a_star(G, available_ingredients, time_limit, fastest=False))
 
+import requests
+import json
+api_key="d1cb3af3cbb94aa1904ebffea410b1c2"
+from bs4 import BeautifulSoup
+
+example_food = "banana smoothie"
+food_search_url = f"https://api.spoonacular.com/recipes/complexSearch?query={example_food}&addRecipeInformation=true&apiKey={api_key}"
+
+response = requests.get(food_search_url)
+
+if response.status_code == 200:
+    results = response.json().get('results', [])
+    if results:
+        recipe = results[0]  
+        id = recipe['id']
+        title = recipe['title']
+        summary = recipe['summary']
+        image_url = recipe['image']
+        soup = BeautifulSoup(summary, "html.parser")
+        summary = soup.get_text()
+        summary = summary.split("It is brought to you by")[0] 
+        print("Recipe ID:",id)
+        print("Title: ",title)
+        print("Summary:",summary)
+    else:
+        print("No results found for the food item.")
+recipe_url=f"https://api.spoonacular.com/recipes/{id}//card?apiKey={api_key}"
+response=requests.get(recipe_url)
+if response.status_code==200:
+    image=response.json()['url']
+    print(image)
+
+
+    
