@@ -56,3 +56,34 @@ def create_recipe_graph():
             G.add_edge(ingredient, recipe)
 
     return G
+import google.generativeai as genai
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+
+gemini = genai.GenerativeModel(
+    model_name="gemini-pro",
+)
+
+def send_message(food_item_with_ingredients):
+    try:
+        ai_identity_context = (
+            "Cook AI: Provide a detailed cooking guide for the given food item. "
+            "Only give response based on the ingredients given."
+            "Speak as if you're guiding someone new to cooking."
+        )
+        chat = gemini.start_chat()
+        message_with_context = ai_identity_context + " User asked: " + food_item_with_ingredients
+        response = chat.send_message(message_with_context)
+
+        return response.text  
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
