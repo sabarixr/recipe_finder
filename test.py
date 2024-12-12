@@ -1,7 +1,7 @@
-# from main.algorithms.Astar import find_recipes_a_star
-# from main.algorithms.bfs import find_recipes_bfs
-# from main.algorithms.dfs import find_recipes_dfs
-# from main.algorithms.dijkstra import find_recipes_dijkstra
+# from algorithms.Astar import find_recipes_a_star
+# from algorithms.bfs import find_recipes_bfs
+# from algorithms.dfs import find_recipes_dfs
+# from algorithms.dijkstra import find_recipes_dijkstra
 
 
 # # available_ingredients = ["Milk", "Banana", "Honey", "Yogurt"]
@@ -16,3 +16,7 @@
 # # print("Recipes (A* - Fastest):", find_recipes_a_star(G, available_ingredients, time_limit, fastest=True))
 # # print("Recipes (A* - All within time):", find_recipes_a_star(G, available_ingredients, time_limit, fastest=False))
 
+
+from nlp.speak_message import generate_audio
+
+generate_audio("Pasta")

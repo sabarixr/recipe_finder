@@ -1,7 +1,14 @@
 
+from algorithms.bfs import find_recipes_bfs
+
+
 def find_recipes_dfs(graph, available_ingredients):
     visited = set()
     recipes_found = []
+
+    bfs_data = find_recipes_bfs(graph, available_ingredients)
+    if bfs_data:
+        return bfs_data
 
     def dfs(node):
         if node in visited:

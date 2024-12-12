@@ -28,7 +28,5 @@ def visualize_graph(graph):
     plt.title("Recipe and Ingredient Bipartite Graph", fontsize=16)
     plt.legend(scatterpoints=1)
     plt.axis('off')
-
-    # Save the graph to a file
     plt.savefig("recipe_graph_bipartite.png")
     print("Graph saved as 'recipe_graph_bipartite.png'")
