@@ -1,37 +1,58 @@
-
 def find_recipes_a_star(graph, available_ingredients, time_limit, fastest=False):
-    def heuristic(node):
-        return graph.nodes[node].get("difficulty", 0)
+    """
+    A* search to find recipes that can be made with the available ingredients.
 
-    open_set = set()
-    g_score = {node: float('inf') for node in graph.nodes}
-    f_score = {node: float('inf') for node in graph.nodes}
-    for ingredient in available_ingredients:
-        g_score[ingredient] = 0
-        f_score[ingredient] = heuristic(ingredient)
-        open_set.add(ingredient)
+    :param graph: A networkx graph containing recipes and their ingredients.
+    :param available_ingredients: A list of ingredients available to the user.
+    :param time_limit: The maximum allowed preparation time.
+    :param fastest: If True, return the single fastest recipe. If False, return all recipes within the time limit.
+    :return: A tuple (recipe_name, missing_ingredients) if fastest=True, otherwise a list of recipes.
+    """
+    
+    results = []
+    best_recipe = None
+    best_missing_ingredients = None
+    best_prep_time = float('inf')
+    best_match_count = -1  # Track the recipe with the most matching ingredients
 
-    came_from = {}
-    valid_recipes = []
+    for node in graph.nodes:
+        # Only consider nodes that represent recipes
+        if graph.nodes[node].get("type") == "recipe":
+            recipe_name = node
+            recipe_data = graph.nodes[node]
+            recipe_ingredients = set(recipe_data["ingredients"])
+            prep_time = recipe_data["prep_time"]
 
-    while open_set:
-        current = min(open_set, key=lambda x: f_score[x])
-        open_set.remove(current)
+            # Skip recipes that exceed the time limit
+            if prep_time > time_limit:
+                continue
 
-        if graph.nodes[current]["type"] == "recipe":
-            prep_time = graph.nodes[current]["prep_time"]
-            if prep_time <= time_limit:
-                valid_recipes.append((current, prep_time, graph.nodes[current]["difficulty"]))
+            # Calculate matching ingredients and missing ingredients
+            common_ingredients = recipe_ingredients & set(available_ingredients)
+            match_count = len(common_ingredients)
+            missing_ingredients = recipe_ingredients - set(available_ingredients)
 
-        for neighbor in graph.neighbors(current):
-            tentative_g_score = g_score[current] + graph.nodes.get(current, {}).get("prep_time", 1)
-            if tentative_g_score < g_score[neighbor]:
-                came_from[neighbor] = current
-                g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = g_score[neighbor] + heuristic(neighbor)
-                open_set.add(neighbor)
+            # Ensure recipes have enough matches to be considered feasible
+            if match_count == 0 or match_count < len(recipe_ingredients) // 2:
+                continue  # Skip recipes with less than half of their ingredients matched
+
+            # Collect all valid recipes when fastest=False
+            if not fastest:
+                results.append((recipe_name, list(missing_ingredients), prep_time, match_count))
+
+            # When fastest=True, find the single best recipe
+            if fastest:
+                if match_count > best_match_count or (match_count == best_match_count and prep_time < best_prep_time):
+                    best_recipe = recipe_name
+                    best_missing_ingredients = list(missing_ingredients)
+                    best_prep_time = prep_time
+                    best_match_count = match_count
 
     if fastest:
-        return min(valid_recipes, key=lambda x: (x[1], x[2]))[0] if valid_recipes else None
-    else:
-        return [recipe[0] for recipe in valid_recipes]
+        if best_recipe:
+            return best_recipe, best_missing_ingredients
+        return "No valid recipe can be made with the given ingredients."
+
+    # Sort results by heuristic: more matches first, then less prep time
+    results.sort(key=lambda x: (-x[3], x[2]))  # Sort by match_count (desc) and prep_time (asc)
+    return [(recipe, missing_ingredients) for recipe, missing_ingredients, _, _ in results]
