@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import markdown2
+import os
 
 from decision_maker import get_response
 from init import create_recipe_graph
@@ -195,7 +196,7 @@ def create_rounded_button(canvas, x, y, size, image_path, command):
     return img_id  # Return image ID for future reference
 
 # Usage in the main code
-image_path = "main/assets/send-message.png"  # Replace with the actual path
+image_path = os.path.join(os.path.dirname(__file__), 'assets', 'send-message.png')
 send_button_canvas = tk.Canvas(footer_frame, width=50, height=50, bg="#272425", highlightthickness=0)
 img_id = create_rounded_button(send_button_canvas, 5, 5, 40, image_path, send_message)
 send_button_canvas.grid(row=0, column=2, padx=10, pady=20)
