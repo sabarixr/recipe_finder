@@ -1,13 +1,73 @@
+import os
 import tkinter as tk
 from tkinter import ttk
+from nlp.agent_voice import extract_prompt, speech_to_text
 import markdown2
+import threading
+import speech_recognition as sr
 import os
 
+import tempfile
 from decision_maker import get_response
 from init import create_recipe_graph
 
+wake_word = "hey"
+
+r = sr.Recognizer()
+
+
+def process_audio(audio_data):
+    """Processes audio data to recognize speech and extract the prompt."""
+    try:
+        # Save the raw audio data to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio_file:
+            temp_audio_file.write(audio_data.get_wav_data())
+            temp_audio_path = temp_audio_file.name
+        
+        # Transcribe the temporary audio file
+        transcribe = speech_to_text(temp_audio_path)
+        cleaned_prompt = extract_prompt(transcribe, wake_word)
+
+        if cleaned_prompt:
+            set_text(cleaned_prompt)  # Sends recognized text to the UI
+    except Exception as e:
+        print(f"Error processing audio: {e}")
+    finally:
+        # Clean up temporary audio file
+        if os.path.exists(temp_audio_path):
+            os.remove(temp_audio_path)
+
+def start_listening():
+    """Continuously listens to the microphone and transcribes speech."""
+    print("Agent is listening...")
+
+    with sr.Microphone() as source:
+        # Adjust for ambient noise
+        print("Adjusting for ambient noise...")
+        r.adjust_for_ambient_noise(source, duration=2)
+
+        while True:
+            try:
+                print("Listening for speech...")
+                audio_data = r.listen(source, timeout=None, phrase_time_limit=10)
+                # Process audio in a separate thread
+                thread = threading.Thread(target=process_audio, args=(audio_data,))
+                thread.start()
+                thread.join() 
+            except sr.WaitTimeoutError:
+                print("Listening timed out, restarting...")
+            except Exception as e:
+                print(f"Error during listening: {e}")
+
+
+
+
 G = create_recipe_graph()
-message_count = 0  # Define message_count globally
+message_count = 0 
+
+def set_text(prompt):
+    send_message(promt=prompt)
+
 
 def add_message(sender, message, align="left"):
     global message_count
@@ -42,8 +102,11 @@ def add_message(sender, message, align="left"):
     message_count += 1
 
 # Usage example:
-def send_message():
-    user_message = entry_box.get()
+def send_message(promt = None):
+    if promt is None:
+        user_message = entry_box.get()
+    else:
+        user_message = promt
     if user_message.strip():
         add_message("User", user_message, align="right")
         entry_box.delete(0, tk.END)
@@ -172,36 +235,52 @@ footer_frame.grid_columnconfigure(1, weight=0)  # Entry box
 footer_frame.grid_columnconfigure(2, weight=0)  # Button
 footer_frame.grid_columnconfigure(3, weight=1)  # Right spacer
 
-entry_box = tk.Entry(footer_frame, bg="#323235", fg="white", font=("Arial", 14), insertbackground="white", bd=0, relief=tk.FLAT, width=80)
+entry_box = tk.Entry(
+    footer_frame,
+    bg="#323235",
+    fg="white",
+    font=("Arial", 14),
+    insertbackground="white",
+    bd=0,
+    relief=tk.FLAT,
+    width=80,
+    highlightthickness=9,  # Adds padding by increasing the highlight area
+    highlightbackground="#323235",  # Matches the background to make it invisible
+    highlightcolor="#323235"  # Matches background for focus appearance
+)
 entry_box.grid(row=0, column=1, padx=(10, 5), pady=20, ipadx=10, ipady=10)
 
 def create_rounded_button(canvas, x, y, size, image_path, command):
     # Load the image
     img = tk.PhotoImage(file=image_path)
-    
-    # Calculate image placement
-    img_width = img.width()
-    img_height = img.height()
-    
-    # Create oval background
-    button_id = canvas.create_oval(x, y, x + size, y + size, fill="#323235", outline="#323235")
-    
-    # Place the image
-    img_id = canvas.create_image(x + size // 2, y + size // 2, image=img)
+    canvas.image = img  # Store the reference to prevent garbage collection
 
-    # Bind button click to command
+    # Create an oval as the button background
+    button_id = canvas.create_oval(x, y, x + size, y + size, fill="#323235", outline="#323235")
+
+    # Place the image inside the button
+    img_id = canvas.create_image(x + size // 2, y + size // 2, image=img, anchor=tk.CENTER)
+
+    # Bind click events to the command
     canvas.tag_bind(button_id, "<Button-1>", lambda e: command())
     canvas.tag_bind(img_id, "<Button-1>", lambda e: command())
 
-    return img_id  # Return image ID for future reference
+    return img_id  # Return the image ID for future reference
+
+image_path = "/home/eclipwze/AMRITA-S3/AI/project/main/assets/send-message.png"
 
 # Usage in the main code
 image_path = os.path.join(os.path.dirname(__file__), 'assets', 'send-message.png')
 send_button_canvas = tk.Canvas(footer_frame, width=50, height=50, bg="#272425", highlightthickness=0)
-img_id = create_rounded_button(send_button_canvas, 5, 5, 40, image_path, send_message)
+create_rounded_button(send_button_canvas, 5, 5, 40, image_path, send_message)
 send_button_canvas.grid(row=0, column=2, padx=10, pady=20)
 
 # Bind Enter key to send message
 entry_box.bind("<Return>", lambda event: send_message())
+def run_speech_agent():
+    threading.Thread(target=start_listening, daemon=True).start()
+
+# Start speech recognition
+run_speech_agent()
 
 root.mainloop()
