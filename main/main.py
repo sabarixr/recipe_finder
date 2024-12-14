@@ -259,7 +259,7 @@ def create_rounded_button(canvas, x, y, size, image_path, command):
     button_id = canvas.create_oval(x, y, x + size, y + size, fill="#323235", outline="#323235")
 
     # Place the image inside the button
-    img_id = canvas.create_image(x + size // 2, y + size // 2, image=img, anchor=tk.CENTER)
+    img_id = canvas.create_image(x + size // 6, y + size // 6, image=img, anchor=tk.CENTER)
 
     # Bind click events to the command
     canvas.tag_bind(button_id, "<Button-1>", lambda e: command())
