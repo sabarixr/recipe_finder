@@ -1,8 +1,9 @@
-import networkx as nx
 import heapq
-def find_recipes_dijkstra(graph, diet_preference,available_ingredients):
+
+def find_recipes_dijkstra(graph, diet_preference, available_ingredients):
     bestrecipes = []
-    betterrecipes = {}
+    betterrecipes = []
+
     p_queue = []
     
     for item in graph.nodes:
@@ -14,23 +15,21 @@ def find_recipes_dijkstra(graph, diet_preference,available_ingredients):
             
             else:
                 heapq.heappush(p_queue, (weight, item, missing_ingredients))
+    
     if p_queue:
         while p_queue:
             weight, recipe, missing_ingredients = heapq.heappop(p_queue)
             if weight <= 3:  
-                betterrecipes[recipe] = missing_ingredients
+                betterrecipes.append((recipe, missing_ingredients))
     
     if bestrecipes:
-        print("Recipe found according to your preferences and avaialable ingredients")
         return bestrecipes
     elif betterrecipes:
-        print("recipe found according to your preferences with few ingredeients missing (upto 3)")
         return betterrecipes
     else:
-        print("No recipes matching to ur preference")
-        return {}
+        return []
 
-# helper function to calculate the weight of each recipe on the basis of its dietary preference and ingredient availabilitiy
+# helper function to calculate the weight of each recipe on the basis of its dietary preference and ingredient availability
 def calculate_weight(graph, recipe, diet_preference, available_ingredients):
     weight = 0
     missing_ingredients = []
@@ -38,7 +37,6 @@ def calculate_weight(graph, recipe, diet_preference, available_ingredients):
     dietary_preference_list = graph.nodes[recipe].get("dietary_compatibility", [])
     if diet_preference not in dietary_preference_list:
         weight += 10  # Add weight if the recipe doesn't match the dietary preference
-    
     
     for ingredient in graph.neighbors(recipe):
         if ingredient not in available_ingredients:

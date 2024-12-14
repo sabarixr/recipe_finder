@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk
+from nlp.speak_message import generate_audio
 from nlp.agent_voice import extract_prompt, speech_to_text
 import markdown2
 import threading
@@ -66,7 +67,7 @@ G = create_recipe_graph()
 message_count = 0 
 
 def set_text(prompt):
-    send_message(promt=prompt)
+    send_message(promt=prompt,is_voice=True)
 
 
 def add_message(sender, message, align="left"):
@@ -102,7 +103,7 @@ def add_message(sender, message, align="left"):
     message_count += 1
 
 # Usage example:
-def send_message(promt = None):
+def send_message(promt = None, is_voice = None):
     if promt is None:
         user_message = entry_box.get()
     else:
@@ -110,12 +111,13 @@ def send_message(promt = None):
     if user_message.strip():
         add_message("User", user_message, align="right")
         entry_box.delete(0, tk.END)
-        response = get_response(G, user_message, var_options.get(), time_entry.get(), cuisines_var.get())
+        response = get_response(G, user_message, var_options.get(), time_entry.get(), cuisines_var.get(),  fastest_var.get())
         
         if response:
             add_message("Agent", response, align="left")
         else:
             add_message("Agent", "Sorry, I couldn't process your request.", align="left")
+        generate_audio(response)
 
 # Main Window
 root = tk.Tk()
@@ -213,10 +215,18 @@ time_label.pack(side="left", padx=(5, 5))
 time_entry = tk.Entry(time_frame, bg="#4A4A4A", fg="white", font=("Arial", 12), bd=0, insertbackground="white")
 time_entry.pack(side="left", padx=(5, 5), pady=5)
 
-fastest_check = tk.Checkbutton(time_section, text="Fastest", bg="#323235", fg="white", font=("Arial", 12), selectcolor="#4A4A4A")
+fastest_var = tk.BooleanVar(value=False)  # Default is unchecked
+fastest_check = tk.Checkbutton(
+    time_section, 
+    text="Fastest", 
+    variable=fastest_var,  # Bind the BooleanVar
+    bg="#323235", 
+    fg="white", 
+    font=("Arial", 12), 
+    selectcolor="#4A4A4A"
+)
 fastest_check.pack(anchor="w", padx=5, pady=5)
 
-# Cuisines Section
 cuisines_var = tk.StringVar(value="")
 cuisines_section = add_section(sidebar_frame, "Cuisines", cuisines_var)
 cuisines_frame = tk.Frame(cuisines_section, bg="#323235")
