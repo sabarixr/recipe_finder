@@ -2,8 +2,7 @@ import networkx as nx
 import heapq
 
 def find_recipes_dijkstra(graph, diet_preference, available_ingredients):
-    bestrecipes = []
-    betterrecipes = {}
+    recipes_ingredients_returned = []  
     p_queue = []
     visited = set()  
 
@@ -12,34 +11,27 @@ def find_recipes_dijkstra(graph, diet_preference, available_ingredients):
             visited.add(ingredient)
             for neighbor in graph.neighbors(ingredient):
                 if graph.nodes[neighbor]["type"] == "recipe":
-                    weight, missing_ingredients = calculate_weight(
-                        graph, neighbor, diet_preference, available_ingredients
-                    )
+                    weight, missing_ingredients = calculate_weight(graph, neighbor, diet_preference, available_ingredients)
 
                     if weight == 0:
-                        bestrecipes.append(neighbor)
+                        recipes_ingredients_returned.append((neighbor, []))  # Best recipe with no missing ingredients
                     else:
                         heapq.heappush(p_queue, (weight, neighbor, missing_ingredients))
                 elif neighbor not in visited:
                     visited.add(neighbor)
 
-  
-    if p_queue:
-        while p_queue:
-            weight, recipe, missing_ingredients = heapq.heappop(p_queue)
-            if weight <= 3:  
-                betterrecipes[recipe] = missing_ingredients
+    # Process recipes from the priority queue (better recipes with missing ingredients)
+    while p_queue:
+        weight, recipe, missing_ingredients = heapq.heappop(p_queue)
+        if weight <= 3:  
+            recipes_ingredients_returned.append((recipe, missing_ingredients))
 
-    
-    if bestrecipes:
+    if recipes_ingredients_returned:
         print("Recipe(s) found according to your preferences and available ingredients")
-        return bestrecipes
-    elif betterrecipes:
-        print("Recipe(s) found according to your preferences with a few ingredients missing (up to 3)")
-        return betterrecipes
+        return recipes_ingredients_returned
     else:
         print("No recipes matching your preferences")
-        return {}
+        return []
 
 # Helper function to calculate the weight of each recipe based on dietary preference and ingredient availability
 def calculate_weight(graph, recipe, diet_preference, available_ingredients):
