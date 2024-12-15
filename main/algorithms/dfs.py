@@ -1,12 +1,11 @@
 from algorithms.bfs import find_recipes_bfs
 
-
 def find_recipes_dfs(graph, available_ingredients):
     visited = set()
     recipes_found = []
     print(available_ingredients)
     
-    # Use BFS to find recipes with ≤ 2 missing ingredients
+    # Call BFS first to get preliminary recipe suggestions
     bfs_data = find_recipes_bfs(graph, available_ingredients)
     if bfs_data:
         print(bfs_data)
@@ -20,7 +19,9 @@ def find_recipes_dfs(graph, available_ingredients):
             return
         visited.add(node)
 
-        if graph.nodes[node]["type"] == "recipe":
+        # Correctly access 'type' attribute
+        node_type = graph.nodes[node].get("type")
+        if node_type == "recipe":
             required_ingredients = set(graph.neighbors(node))
             missing_ingredients = required_ingredients - set(available_ingredients)
             if len(missing_ingredients) <= 2:
@@ -29,8 +30,11 @@ def find_recipes_dfs(graph, available_ingredients):
         for neighbor in graph.neighbors(node):
             dfs(neighbor)
 
-    # Start DFS from available ingredients
     for ingredient in available_ingredients:
         dfs(ingredient)
     
+
+    if not recipes_found:
+        return None
+
     return recipes_found

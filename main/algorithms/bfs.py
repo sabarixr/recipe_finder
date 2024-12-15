@@ -27,5 +27,8 @@ def find_recipes_bfs(graph, available_ingredients, cuisine=None):
                         recipes_found.append(neighbor)
             elif neighbor not in visited:
                 queue.append(neighbor)  
-
+                
+    if not recipes_found:
+        return None
+    
     return recipes_found

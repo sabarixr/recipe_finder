@@ -7,6 +7,8 @@ import markdown2
 import threading
 import speech_recognition as sr
 import os
+from PIL import Image, ImageTk
+
 
 import tempfile
 from decision_maker import get_response
@@ -16,6 +18,9 @@ wake_word = "hey"
 
 r = sr.Recognizer()
 
+def on_scroll(event):
+    """Handle two-finger scrolling event."""
+    chat_canvas.yview_scroll(int(event.delta / 120), "units")
 
 def process_audio(audio_data):
     """Processes audio data to recognize speech and extract the prompt."""
@@ -101,6 +106,7 @@ def add_message(sender, message, align="left"):
 
     # Increment message count for the next message
     message_count += 1
+    chat_canvas.yview_moveto(1.0)
 
 # Usage example:
 def send_message(promt = None, is_voice = None):
@@ -111,13 +117,18 @@ def send_message(promt = None, is_voice = None):
     if user_message.strip():
         add_message("User", user_message, align="right")
         entry_box.delete(0, tk.END)
-        response = get_response(G, user_message, var_options.get(), time_entry.get(), cuisines_var.get(),  fastest_var.get())
+        response = get_response(G, user_message, options_var.get(), time_entry.get(), cuisines_var.get(),  fastest_var.get())
         
         if response:
             add_message("Agent", response, align="left")
+            
         else:
             add_message("Agent", "Sorry, I couldn't process your request.", align="left")
-        generate_audio(response)
+        
+        if is_voice:
+            generate_audio(response)
+    else:
+        add_message("Agent", "Please provide the available ingreadints", align="left")
 
 # Main Window
 root = tk.Tk()
@@ -126,9 +137,12 @@ root.title("Let AI Cook")
 root.config(bg="#272425")
 
 # Configure Grid
-root.columnconfigure(0, weight=99)  # Main content (70% width)
-root.columnconfigure(1, weight=1)  # Sidebar (30% width)
-root.rowconfigure(1, weight=1)     # Chat area (main section)
+root.columnconfigure(0, weight=99)  # Main content (chat area)
+root.columnconfigure(1, weight=1)   # Sidebar
+root.rowconfigure(0, weight=0)      # Header (fixed height)
+root.rowconfigure(1, weight=1)      # Chat area (resizable)
+root.rowconfigure(2, weight=0)      # Footer (fixed height)
+
 
 # Style Scrollbar
 style = ttk.Style(root)
@@ -147,9 +161,11 @@ style.map("Vertical.TScrollbar",
 
 # Header
 header_frame = tk.Frame(root, bg="#272425", height=60)
+header_frame.grid(row=0, column=0, sticky="nsew", padx=(50, 0))  
+header_frame.grid_columnconfigure(0, weight=1)
+
 header_label = tk.Label(header_frame, text="Let AI Cook", bg="#272425", fg="white", font=("Arial", 24, "bold"))
 header_label.pack(anchor="center", pady=10)
-header_frame.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=(50, 50))
 
 # Chat Area
 chat_frame = tk.Frame(root, bg="#272425")
@@ -174,9 +190,14 @@ def resize_chat_area(event):
 chat_canvas.bind("<Configure>", resize_chat_area)
 chat_area.bind("<Configure>", lambda e: chat_canvas.configure(scrollregion=chat_canvas.bbox("all")))
 
-# Sidebar
+# Bind two-finger scroll
+chat_canvas.bind("<MouseWheel>", on_scroll)
+chat_canvas.bind("<Button-4>", on_scroll)  # Scroll up
+chat_canvas.bind("<Button-5>", on_scroll) 
+
 sidebar_frame = tk.Frame(root, bg="#1e1e1e", width=250)
-sidebar_frame.grid(row=1, column=1, sticky="nsew")
+sidebar_frame.grid(row=0, column=1, rowspan=3, sticky="nsew")  # Spanning all rows (header, chat, footer)
+sidebar_frame.grid_rowconfigure(0, weight=1)
 
 # Helper for adding sections
 def add_section(parent, title, var):
@@ -194,14 +215,31 @@ def add_section(parent, title, var):
 def clear_selection(var):
     var.set("")  
 
-var_options = tk.StringVar(value="")
-options_section = add_section(sidebar_frame, "Options", var_options)
-options_grid = tk.Frame(options_section, bg="#323235")
-options_grid.pack()
+options_var = tk.StringVar(value="")  # Variable to store the selected option
+options_section = add_section(sidebar_frame, "Dietary Options", options_var)  # Add the options section
+options_frame = tk.Frame(options_section, bg="#323235")
+options_frame.pack()
 
-options = ["Sugar Free", "Gluten Free", "Low Carb", "Plant Based"]
+# Updated list of options
+options = [
+    "plant-based", "gluten-free", "high-protein", 
+    "comfort-food", "vegetarian", "low-carb", "sugar-free"
+]
+
+# Render buttons in a 3-per-row layout
 for i, option in enumerate(options):
-    tk.Radiobutton(options_grid, text=option, variable=var_options, value=option, bg="#323235", fg="white", font=("Arial", 12), selectcolor="#4A4A4A").grid(row=i//2, column=i%2, padx=5, pady=5, sticky="w")
+    row = i // 3  # Calculate the row index
+    col = i % 3   # Calculate the column index
+    tk.Radiobutton(
+        options_frame, 
+        text=option, 
+        variable=options_var, 
+        value=option, 
+        bg="#323235", 
+        fg="white", 
+        font=("Arial", 12), 
+        selectcolor="#4A4A4A"
+    ).grid(row=row, column=col, padx=10, pady=5, sticky="w")
 
 # Time Constraint Section
 time_var = tk.StringVar(value="")
@@ -227,23 +265,40 @@ fastest_check = tk.Checkbutton(
 )
 fastest_check.pack(anchor="w", padx=5, pady=5)
 
-cuisines_var = tk.StringVar(value="")
-cuisines_section = add_section(sidebar_frame, "Cuisines", cuisines_var)
+cuisines_var = tk.StringVar(value="")  # Variable to store selected cuisine
+cuisines_section = add_section(sidebar_frame, "Cuisines", cuisines_var)  # Add the cuisines section
 cuisines_frame = tk.Frame(cuisines_section, bg="#323235")
 cuisines_frame.pack()
 
-cuisines = ["Indian", "Arabian", "Chinese"]
-for i, cuisine in enumerate(cuisines):
-    tk.Radiobutton(cuisines_frame, text=cuisine, variable=cuisines_var, value=cuisine, bg="#323235", fg="white", font=("Arial", 12), selectcolor="#4A4A4A").grid(row=0, column=i, padx=10, pady=5, sticky="w")
+# List of cuisines
+cuisines = [
+    "Indian", "Arabian", "Chinese", "Spanish", "Italian", "Middle Eastern", 
+    "Japanese", "Asian", "Mediterranean", "Mexican", "American", "French", 
+    "Thai", "Vietnamese", "British", "German", "Malaysian"
+]
 
+# Render buttons in 3-per-row layout
+for i, cuisine in enumerate(cuisines):
+    row = i // 3  # Calculate the row index
+    col = i % 3   # Calculate the column index
+    tk.Radiobutton(
+        cuisines_frame, 
+        text=cuisine, 
+        variable=cuisines_var, 
+        value=cuisine, 
+        bg="#323235", 
+        fg="white", 
+        font=("Arial", 12), 
+        selectcolor="#4A4A4A"
+    ).grid(row=row, column=col, padx=10, pady=5, sticky="w")
 # Footer
 footer_frame = tk.Frame(root, bg="#272425", height=80)
-footer_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(50, 50))
+footer_frame.grid(row=2, column=0, sticky="nsew", padx=(50, 0))  # Matches chat area width
 
-footer_frame.grid_columnconfigure(0, weight=1)  # Left spacer
-footer_frame.grid_columnconfigure(1, weight=0)  # Entry box
-footer_frame.grid_columnconfigure(2, weight=0)  # Button
-footer_frame.grid_columnconfigure(3, weight=1)  # Right spacer
+footer_frame.grid_columnconfigure(0, weight=1)  # Spacer before entry box
+footer_frame.grid_columnconfigure(1, weight=8)  # Entry box width proportional to chat area
+footer_frame.grid_columnconfigure(2, weight=0)  # Button column
+footer_frame.grid_columnconfigure(3, weight=1)  # Spacer after button (remaining space)
 
 entry_box = tk.Entry(
     footer_frame,
@@ -254,43 +309,53 @@ entry_box = tk.Entry(
     bd=0,
     relief=tk.FLAT,
     width=80,
-    highlightthickness=9,  # Adds padding by increasing the highlight area
-    highlightbackground="#323235",  # Matches the background to make it invisible
-    highlightcolor="#323235"  # Matches background for focus appearance
+    highlightthickness=9,
+    highlightbackground="#323235",
+    highlightcolor="#323235"
 )
 entry_box.grid(row=0, column=1, padx=(10, 5), pady=20, ipadx=10, ipady=10)
 
 def create_rounded_button(canvas, x, y, size, image_path, command):
-    # Load the image
-    img = tk.PhotoImage(file=image_path)
-    canvas.image = img  # Store the reference to prevent garbage collection
+    img = Image.open(image_path)
+    max_image_size = int(size * 0.7)  # Make the image 70% of the button size
+    img.thumbnail((max_image_size, max_image_size), Image.Resampling.LANCZOS)
+    img_tk = ImageTk.PhotoImage(img)
+    canvas.image = img_tk
 
     # Create an oval as the button background
     button_id = canvas.create_oval(x, y, x + size, y + size, fill="#323235", outline="#323235")
 
-    # Place the image inside the button
-    img_id = canvas.create_image(x + size // 6, y + size // 6, image=img, anchor=tk.CENTER)
+    # Calculate the center of the oval
+    center_x = x + size // 2
+    center_y = y + size // 2
+
+    # Place the image at the center of the oval
+    img_id = canvas.create_image(center_x, center_y, image=img_tk, anchor="center")
 
     # Bind click events to the command
     canvas.tag_bind(button_id, "<Button-1>", lambda e: command())
     canvas.tag_bind(img_id, "<Button-1>", lambda e: command())
 
-    return img_id  # Return the image ID for future reference
+    return img_id
 
-image_path = "/home/eclipwze/AMRITA-S3/AI/project/main/assets/send-message.png"
+def adjust_button_to_entry_height():
+    entry_box_height = entry_box.winfo_height()
 
-# Usage in the main code
+    send_button_canvas.config(width=entry_box_height, height=entry_box_height)
+    create_rounded_button(send_button_canvas, 0, 0, entry_box_height, image_path, send_message)
+
 image_path = os.path.join(os.path.dirname(__file__), 'assets', 'send-message.png')
-send_button_canvas = tk.Canvas(footer_frame, width=50, height=50, bg="#272425", highlightthickness=0)
-create_rounded_button(send_button_canvas, 5, 5, 40, image_path, send_message)
-send_button_canvas.grid(row=0, column=2, padx=10, pady=20)
+send_button_canvas = tk.Canvas(footer_frame, bg="#272425", highlightthickness=0)
+send_button_canvas.grid(row=0, column=2, padx=(5, 10), pady=20)  # Reduced padding between entry and button
 
-# Bind Enter key to send message
+footer_frame.after(10, adjust_button_to_entry_height)
+
 entry_box.bind("<Return>", lambda event: send_message())
-def run_speech_agent():
-    threading.Thread(target=start_listening, daemon=True).start()
 
-# Start speech recognition
-run_speech_agent()
+
+# def run_speech_agent():
+#     threading.Thread(target=start_listening, daemon=True).start()
+
+# run_speech_agent()
 
 root.mainloop()

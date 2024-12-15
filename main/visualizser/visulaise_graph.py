@@ -5,8 +5,8 @@ def visualize_graph(graph):
     plt.figure(figsize=(20, 32))  # Larger figure for more spacing
 
     # Use bipartite layout for proper separation
-    ingredients = [n for n, d in graph.nodes(data=True) if d['type'] == 'ingredient']
-    recipes = [n for n, d in graph.nodes(data=True) if d['type'] == 'recipe']
+    ingredients = [n for n, d in graph.nodes(data=True) if d.get('bipartite') == 0]
+    recipes = [n for n, d in graph.nodes(data=True) if d.get('bipartite') == 1]
     pos = nx.bipartite_layout(graph, ingredients, align='vertical')
     
     # Adjust positions for better spacing

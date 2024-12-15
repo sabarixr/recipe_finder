@@ -6,17 +6,17 @@ def combine_data_using_decision_tree(spoonacular_data,mealdb_data ):
     spoonacular_title, spoonacular_summary, spoonacular_image = spoonacular_data if spoonacular_data else ('', '', '')
     mealdb_title, mealdb_summary, mealdb_image = mealdb_data if mealdb_data else ('', '', '')
 
-    if spoonacular_summary and len(spoonacular_summary) > 50:
-        summary = spoonacular_summary
-    elif mealdb_summary and len(mealdb_summary) > 50:
+    if mealdb_summary and len(mealdb_summary) > 50:
         summary = mealdb_summary
+    elif  spoonacular_summary and len(spoonacular_summary) > 50:
+        summary = spoonacular_summary
     else:
-        summary = spoonacular_summary if spoonacular_summary else mealdb_summary
+        summary = mealdb_data if mealdb_summary else spoonacular_summary
 
-    if spoonacular_title and len(spoonacular_title) > len(mealdb_title):
-        title = spoonacular_title
-    else:
+    if spoonacular_title and len(spoonacular_title) < len(mealdb_title):
         title = mealdb_title
+    else:
+        title = spoonacular_title
 
 
     if mealdb_image and mealdb_image != '':

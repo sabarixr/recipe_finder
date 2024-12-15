@@ -35,6 +35,8 @@ def get_response(Graph ,user_message, dietary, time_entry, cuisines, fastest= Fa
 
         if time_entry:
             print("A* time")
+            print(fastest)
+            print(int(time_entry))
             return_data = Astar.find_recipes_a_star(Graph, ingredients, int(time_entry), fastest)
             if return_data:
                 print(return_data)
@@ -42,7 +44,7 @@ def get_response(Graph ,user_message, dietary, time_entry, cuisines, fastest= Fa
             else:
                 return "Sorry but there was no recipes that can be cooked with the ingredients provided."
         if cuisines:
-            print("cus")
+            print("bfs-cusines")
             bfs_data = bfs.find_recipes_bfs(Graph, ingredients,cuisines)
             if bfs_data:
                 print(bfs_data)
