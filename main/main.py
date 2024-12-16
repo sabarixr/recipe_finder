@@ -20,7 +20,18 @@ r = sr.Recognizer()
 
 def on_scroll(event):
     """Handle two-finger scrolling event."""
-    chat_canvas.yview_scroll(int(event.delta / 120), "units")
+    # For Windows and Linux
+    if event.delta:
+        chat_canvas.yview_scroll(-1 * (event.delta // 120), "units")
+    # For MacOS
+    elif event.num == 4:  # Scroll up
+        chat_canvas.yview_scroll(-1, "units")
+    elif event.num == 5:  # Scroll down
+        chat_canvas.yview_scroll(1, "units")
+
+# Bind the scroll events
+
+
 
 def process_audio(audio_data):
     """Processes audio data to recognize speech and extract the prompt."""
@@ -106,6 +117,7 @@ def add_message(sender, message, align="left"):
 
     # Increment message count for the next message
     message_count += 1
+    root.update()
     chat_canvas.yview_moveto(1.0)
 
 # Usage example:
@@ -189,11 +201,10 @@ def resize_chat_area(event):
 
 chat_canvas.bind("<Configure>", resize_chat_area)
 chat_area.bind("<Configure>", lambda e: chat_canvas.configure(scrollregion=chat_canvas.bbox("all")))
+chat_canvas.bind_all("<MouseWheel>", on_scroll)  # For Windows and Linux
+chat_canvas.bind_all("<Button-4>", on_scroll)   # For MacOS (Scroll up)
+chat_canvas.bind_all("<Button-5>", on_scroll)   # For MacOS (Scroll down)
 
-# Bind two-finger scroll
-chat_canvas.bind("<MouseWheel>", on_scroll)
-chat_canvas.bind("<Button-4>", on_scroll)  # Scroll up
-chat_canvas.bind("<Button-5>", on_scroll) 
 
 sidebar_frame = tk.Frame(root, bg="#1e1e1e", width=250)
 sidebar_frame.grid(row=0, column=1, rowspan=3, sticky="nsew")  # Spanning all rows (header, chat, footer)
@@ -353,9 +364,9 @@ footer_frame.after(10, adjust_button_to_entry_height)
 entry_box.bind("<Return>", lambda event: send_message())
 
 
-# def run_speech_agent():
-#     threading.Thread(target=start_listening, daemon=True).start()
+def run_speech_agent():
+    threading.Thread(target=start_listening, daemon=True).start()
 
-# run_speech_agent()
+run_speech_agent()
 
 root.mainloop()

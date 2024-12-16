@@ -37,7 +37,7 @@ ingredients = [
     "Yucca", "Achiote", "Papaya", "Mango", "Passion fruit", "Tapioca", "Quinoa", "Pork", "Red beans", 
     "Salsa Verde", "Chimichurri", "Cumin", "Epazote",
     'Cream of mushroom soup', 'Kidney beans', 'Lime leaves', 'Apple', 'Bacon', 'Mint', 'Crab', 'Gojujang',
-    'Pancake', 'Hummus', 'Mayonnaise', 'Pasta', 'Semolina', 'Mushrooms', 'Sushi rice', 'Mayo', 'Pork bones',
+     'Hummus', 'Mayonnaise', 'Pasta', 'Semolina', 'Mushrooms', 'Sushi rice', 'Mayo', 'Pork bones',
     'Broth', 'Lasagna noodles', 'Chicken wings', 'Ground beef', 'Bean sprouts', 'Green beans', 'Mascarpone',
     'Oaxaca cheese', 'Green salsa', 'Tortilla chips', 'Chili flakes', 'Bread', 'Rosemary', 'Cocoa powder',
     'Peanut', 'Pickled vegetables', 'Chili pepper', 'Rice paper', 'Vermicelli', 'Nori', 'Coffee', 'Sesame seeds',
@@ -149,13 +149,7 @@ recipes = {
         "dietary_compatibility": ["plant-based", "gluten-free"],
         "cuisine": "Indian"
     },
-    "Falafel": {
-        "ingredients": ["Chickpeas", "Garlic", "Cumin", "Cilantro", "Flour"],
-        "difficulty": 3,
-        "prep_time": 45,
-        "dietary_compatibility": ["plant-based"],
-        "cuisine": "Middle Eastern"
-    },
+
     "Coconut Rice": {
         "ingredients": ["Rice", "Coconut milk", "Salt", "Sugar", "Water"],
         "difficulty": 1,
@@ -352,13 +346,7 @@ recipes = {
         "dietary_compatibility": ["gluten-free"],
         "cuisine": "American"
     },
-    "Chili": {
-        "ingredients": ["Beef", "Kidney beans", "Tomato", "Onion", "Garlic"],
-        "difficulty": 3,
-        "prep_time": 45,
-        "dietary_compatibility": ["gluten-free"],
-        "cuisine": "American"
-    },
+
     "Potato Salad": {
         "ingredients": ["Potato", "Mayo", "Mustard", "Celery", "Onion"],
         "difficulty": 1,
@@ -857,12 +845,7 @@ recipes = {
         "cuisine": "Mexican"
     },
 
-    "Peking Duck Pancakes": {
-        "ingredients": ["Duck", "Cucumber", "Spring onion", "Hoisin sauce", "Pancake"],
-        "difficulty": 5,
-        "prep_time": 180,
-        "dietary_compatibility": []
-    },
+
     "Sichuan Hot Pot": {
         "ingredients": ["Beef", "Tofu", "Cabbage", "Chili oil", "Mushrooms"],
         "difficulty": 4,
@@ -919,13 +902,7 @@ recipes = {
         "dietary_compatibility": ["plant-based"],
         "cuisine": "Indonesian"
     },
-    "Kimchi": {
-        "ingredients": ["Napa cabbage", "Garlic", "Ginger", "Chili flakes", "Fish sauce"],
-        "difficulty": 4,
-        "prep_time": 20,
-        "dietary_compatibility": ["plant-based"],
-        "cuisine": "Korean"
-    },
+
     "Dim Sum": {
         "ingredients": ["Pork", "Shrimp", "Dumpling wrappers", "Ginger", "Soy sauce"],
         "difficulty": 4,
@@ -1264,11 +1241,6 @@ recipes = {
     }
 
 }
-
-   
-    
-    
-    
 
 
 def get_ingredients():
