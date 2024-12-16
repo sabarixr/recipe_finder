@@ -56,6 +56,7 @@ def send_message(food_items):
             response = cache.get(cache_key)
         else:
             fetch = filter_out_avilable(item_)
+            filtered = None
             if fetch:
                 filtered = fetch[:2]
 
