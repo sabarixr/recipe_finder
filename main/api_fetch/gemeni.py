@@ -18,7 +18,7 @@ def send_message(food_items):
 
         for idx, recipe in enumerate(responses, 1):
             food_item_name = food_items[idx - 1][0] if isinstance(food_items[idx - 1], tuple) else food_items[idx - 1]
-            formatted_response = f"**{food_item_name}**\n"
+            formatted_response = f"**{food_item_name}**\n\n"
             formatted_response += recipe.replace("\n", "\n  ")
             
             # Add missing ingredients if available
@@ -35,10 +35,9 @@ def send_message(food_items):
     model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
     responses = []
-    missing_ingredients_list = []  # To store missing ingredients
+    missing_ingredients_list = []  
 
     for food_item in food_items:
-        # Check if the food item is a tuple
         if isinstance(food_item, tuple):
             item_name = food_item[0]
             missing_ingredients = food_item[1]
