@@ -1,6 +1,6 @@
 aiofiles==24.1.0
 annotated-types==0.7.0
-anyio==4.7.0
+anyio==4.14.2
 av==14.0.1
 babel==2.16.0
 beautifulsoup4==4.12.3
@@ -9,7 +9,7 @@ blis==1.0.1
 bs4==0.0.2
 cachetools==5.5.0
 catalogue==2.0.10
-certifi==2024.8.30
+certifi==2026.10.18
 charset-normalizer==3.4.0
 click==8.1.7
 cloudpathlib==0.20.0
@@ -33,7 +33,7 @@ filelock==3.16.1
 Flask==3.1.0
 flatbuffers==24.3.25
 fonttools==4.55.3
-fsspec==2024.10.0
+fsspec==2026.6.0
 fuzzywuzzy==0.18.0
 google-ai-generativelanguage==0.6.10
 google-api-core==2.23.0
@@ -47,7 +47,7 @@ grpcio-status==1.68.1
 gruut==2.4.0
 gruut-ipa==0.13.0
 gruut_lang_en==2.0.1
-h11==0.14.0
+h11==0.16.0
 h2==4.1.0
 hpack==4.0.0
 httpcore==1.0.7
@@ -59,7 +59,7 @@ Hypercorn==0.17.3
 hyperframe==6.0.1
 idna==3.10
 itsdangerous==2.2.0
-Jinja2==3.1.4
+Jinja2==3.1.6
 jsonlines==1.2.0
 kiwisolver==1.4.7
 langcodes==3.5.0
@@ -95,12 +95,12 @@ onnxruntime==1.20.1
 packaging==24.2
 panphon==0.21.2
 phonemes2ids==1.2.2
-pillow==11.0.0
+pillow==13.0.0
 preshed==3.0.9
 priority==2.0.0
 proto-plus==1.25.0
 protobuf==5.29.1
-pyasn1==0.6.1
+pyasn1==0.6.5
 pyasn1_modules==0.4.1
 PyAudio==0.2.14
 pydantic==2.10.3
@@ -114,19 +114,19 @@ python-dotenv==1.0.1
 python-Levenshtein==0.26.1
 pytz==2024.2
 PyYAML==6.0.2
-Quart==0.19.9
+Quart==0.20.0
 quart-cors==0.7.0
 RapidFuzz==3.10.1
 regex==2024.11.6
 requests==2.32.3
 rich==13.9.4
 rsa==4.9
-setuptools==75.6.0
+setuptools==84.1.0
 shellingham==1.5.4
 six==1.17.0
 smart-open==7.0.5
 sniffio==1.3.1
-soupsieve==2.6
+soupsieve==4.0.0
 spacy==3.8.2
 spacy-legacy==3.0.12
 spacy-loggers==1.0.5
@@ -136,7 +136,7 @@ swagger-ui-py==21.12.8
 sympy==1.13.1
 thinc==8.3.2
 tokenizers==0.21.0
-torch==2.5.1
+torch==2.13.0
 torchaudio==2.5.1
 torchvision==0.20.1
 tqdm==4.67.1
@@ -147,7 +147,7 @@ typing_extensions==4.12.2
 tzlocal==5.2
 unicodecsv==0.14.1
 uritemplate==4.1.1
-urllib3==2.2.3
+urllib3==2.8.0
 wasabi==1.1.3
 weasel==0.4.1
 websockets==14.1
@@ -155,3 +155,4 @@ Werkzeug==3.1.3
 wrapt==1.17.0
 wsproto==1.2.0
 xdgenvpy==2.4.0
+speech-recognition
